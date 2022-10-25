@@ -19,7 +19,6 @@ public final class ConnectInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         log.info("ConnectInterceptor.intercept");
-        System.out.println("dddddd");
         return chain.proceed(chain.request());
     }
 }
