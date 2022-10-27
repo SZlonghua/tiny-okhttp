@@ -1,6 +1,7 @@
 package com.tiny.okhttp;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public interface Interceptor {
 
@@ -11,5 +12,12 @@ public interface Interceptor {
         Request request();
 
         Response proceed(Request request) throws IOException;
+
+        int connectTimeoutMillis();
+
+        int readTimeoutMillis();
+
+        int writeTimeoutMillis();
+
     }
 }

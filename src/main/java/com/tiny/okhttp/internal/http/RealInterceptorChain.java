@@ -49,6 +49,21 @@ public final class RealInterceptorChain implements Interceptor.Chain {
         return proceed(request, transmitter, exchange);
     }
 
+    @Override
+    public int connectTimeoutMillis() {
+        return connectTimeout;
+    }
+
+    @Override
+    public int readTimeoutMillis() {
+        return readTimeout;
+    }
+
+    @Override
+    public int writeTimeoutMillis() {
+        return writeTimeout;
+    }
+
     public Response proceed(Request request, Transmitter transmitter, @Nullable Exchange exchange)
             throws IOException {
         if (index >= interceptors.size()) throw new AssertionError();
@@ -72,5 +87,9 @@ public final class RealInterceptorChain implements Interceptor.Chain {
         }
 
         return response;
+    }
+
+    public Transmitter transmitter() {
+        return transmitter;
     }
 }

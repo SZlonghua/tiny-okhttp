@@ -2,18 +2,28 @@ package com.tiny.okhttp;
 
 public class OkHttpClient implements Call.Factory {
 
+    final boolean retryOnConnectionFailure;
+
     final int connectTimeout;
     final int readTimeout;
     final int writeTimeout;
+    final int pingInterval;
+
+    ConnectionPool connectionPool;
 
     public OkHttpClient() {
         this(new Builder());
     }
 
     OkHttpClient(Builder builder) {
+        this.retryOnConnectionFailure = builder.retryOnConnectionFailure;
+
         this.connectTimeout = builder.connectTimeout;
         this.readTimeout = builder.readTimeout;
         this.writeTimeout = builder.writeTimeout;
+        this.pingInterval = builder.pingInterval;
+
+        this.connectionPool = builder.connectionPool;
     }
 
     @Override
@@ -33,16 +43,38 @@ public class OkHttpClient implements Call.Factory {
         return writeTimeout;
     }
 
+    public int pingIntervalMillis() {
+        return pingInterval;
+    }
+
+    public boolean retryOnConnectionFailure() {
+        return retryOnConnectionFailure;
+    }
+
+    public ConnectionPool connectionPool() {
+        return connectionPool;
+    }
+
     public static final class Builder {
+
+        boolean retryOnConnectionFailure;
 
         int connectTimeout;
         int readTimeout;
         int writeTimeout;
+        int pingInterval;
+
+        ConnectionPool connectionPool;
 
         public Builder() {
+            retryOnConnectionFailure = true;
+
             connectTimeout = 10_000;
             readTimeout = 10_000;
             writeTimeout = 10_000;
+            pingInterval = 0;
+
+            connectionPool = new ConnectionPool();
         }
 
     }
