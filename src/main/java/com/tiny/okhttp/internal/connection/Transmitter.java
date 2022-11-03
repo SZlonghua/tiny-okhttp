@@ -15,7 +15,8 @@ public final class Transmitter {
     private Request request;
     private ExchangeFinder exchangeFinder;
 
-//    public RealConnection connection;
+    // Guarded by connectionPool.
+    public RealConnection connection;
     private @Nullable Exchange exchange;
     private boolean exchangeRequestDone;
     private boolean exchangeResponseDone;
@@ -36,7 +37,7 @@ public final class Transmitter {
     }
 
     private Address createAddress(HttpUrl url) {
-        return new Address();
+        return new Address(url,client.socketFactory());
     }
 
     Exchange newExchange(Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
@@ -61,5 +62,11 @@ public final class Transmitter {
             this.exchangeResponseDone = false;
             return result;
         }
+    }
+
+    void acquireConnectionNoEvents(RealConnection connection) {
+
+        if (this.connection != null) throw new IllegalStateException();
+        this.connection = connection;
     }
 }
