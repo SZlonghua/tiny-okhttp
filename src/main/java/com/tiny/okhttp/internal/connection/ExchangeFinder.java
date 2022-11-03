@@ -1,13 +1,14 @@
 package com.tiny.okhttp.internal.connection;
 
-import com.tiny.okhttp.Address;
-import com.tiny.okhttp.Call;
-import com.tiny.okhttp.Interceptor;
-import com.tiny.okhttp.OkHttpClient;
+import com.tiny.okhttp.*;
 import com.tiny.okhttp.internal.http.ExchangeCodec;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
+@Slf4j
 final class ExchangeFinder {
     private final Transmitter transmitter;
     private final RealConnectionPool connectionPool;
@@ -50,6 +51,20 @@ final class ExchangeFinder {
     private RealConnection findHealthyConnection(int connectTimeout, int readTimeout,
                                                  int writeTimeout, int pingIntervalMillis, boolean connectionRetryEnabled,
                                                  boolean doExtensiveHealthChecks) throws IOException {
-        return new RealConnection();
+        log.info("findHealthyConnection doExtensiveHealthChecks:{}",doExtensiveHealthChecks);
+        return findConnection(connectTimeout, readTimeout, writeTimeout,
+                pingIntervalMillis, connectionRetryEnabled);
+    }
+
+    private RealConnection findConnection(int connectTimeout, int readTimeout, int writeTimeout,
+                                          int pingIntervalMillis, boolean connectionRetryEnabled) throws IOException {
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(address.url.host(), address.url.port());
+        Route selectedRoute = new Route(address, Proxy.NO_PROXY, inetSocketAddress);
+
+        RealConnection result = new RealConnection(connectionPool, selectedRoute);
+        result.connect(connectTimeout, readTimeout, writeTimeout, pingIntervalMillis,
+                connectionRetryEnabled, call);
+        transmitter.acquireConnectionNoEvents(result);
+        return result;
     }
 }

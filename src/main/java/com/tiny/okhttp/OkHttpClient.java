@@ -1,6 +1,10 @@
 package com.tiny.okhttp;
 
+import javax.net.SocketFactory;
+
 public class OkHttpClient implements Call.Factory {
+
+    final SocketFactory socketFactory;
 
     final boolean retryOnConnectionFailure;
 
@@ -16,6 +20,8 @@ public class OkHttpClient implements Call.Factory {
     }
 
     OkHttpClient(Builder builder) {
+
+        this.socketFactory = builder.socketFactory;
         this.retryOnConnectionFailure = builder.retryOnConnectionFailure;
 
         this.connectTimeout = builder.connectTimeout;
@@ -29,6 +35,10 @@ public class OkHttpClient implements Call.Factory {
     @Override
     public Call newCall(Request request) {
         return RealCall.newRealCall(this, request);
+    }
+
+    public SocketFactory socketFactory() {
+        return socketFactory;
     }
 
     public int connectTimeoutMillis() {
@@ -57,6 +67,8 @@ public class OkHttpClient implements Call.Factory {
 
     public static final class Builder {
 
+        SocketFactory socketFactory;
+
         boolean retryOnConnectionFailure;
 
         int connectTimeout;
@@ -67,6 +79,8 @@ public class OkHttpClient implements Call.Factory {
         ConnectionPool connectionPool;
 
         public Builder() {
+
+            socketFactory = SocketFactory.getDefault();
             retryOnConnectionFailure = true;
 
             connectTimeout = 10_000;
