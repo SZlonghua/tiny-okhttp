@@ -64,6 +64,11 @@ public final class RealInterceptorChain implements Interceptor.Chain {
         return writeTimeout;
     }
 
+    public Exchange exchange() {
+        if (exchange == null) throw new IllegalStateException();
+        return exchange;
+    }
+
     public Response proceed(Request request, Transmitter transmitter, @Nullable Exchange exchange)
             throws IOException {
         if (index >= interceptors.size()) throw new AssertionError();

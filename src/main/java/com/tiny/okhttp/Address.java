@@ -14,4 +14,8 @@ public final class Address {
     public SocketFactory socketFactory() {
         return socketFactory;
     }
+
+    public HttpUrl url() {
+        return url;
+    }
 }
