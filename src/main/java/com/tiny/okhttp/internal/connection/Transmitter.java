@@ -4,6 +4,11 @@ import com.sun.istack.internal.Nullable;
 import com.tiny.okhttp.*;
 import com.tiny.okhttp.internal.http.ExchangeCodec;
 
+import java.io.IOException;
+import java.lang.ref.Reference;
+import java.net.Socket;
+
+import static com.tiny.okhttp.internal.Util.closeQuietly;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public final class Transmitter {
@@ -68,5 +73,53 @@ public final class Transmitter {
 
         if (this.connection != null) throw new IllegalStateException();
         this.connection = connection;
+    }
+
+
+    @Nullable
+    IOException exchangeMessageDone(
+            Exchange exchange, boolean requestDone, boolean responseDone, @Nullable IOException e) {
+        boolean exchangeDone = false;
+        synchronized (connectionPool) {
+            if (exchange != this.exchange) {
+                return e; // This exchange was detached violently!
+            }
+            boolean changed = false;
+            if (requestDone) {
+                if (!exchangeRequestDone) changed = true;
+                this.exchangeRequestDone = true;
+            }
+            if (responseDone) {
+                if (!exchangeResponseDone) changed = true;
+                this.exchangeResponseDone = true;
+            }
+            if (exchangeRequestDone && exchangeResponseDone && changed) {
+                exchangeDone = true;
+                this.exchange.connection().successCount++;
+                this.exchange = null;
+            }
+        }
+        if (exchangeDone) {
+            e = maybeReleaseConnection(e, false);
+        }
+        return e;
+    }
+
+    private @Nullable IOException maybeReleaseConnection(@Nullable IOException e, boolean force) {
+        Socket socket;
+        synchronized (connectionPool) {
+            if (force && exchange != null) {
+                throw new IllegalStateException("cannot release connection while it is in use");
+            }
+            socket = this.connection != null && exchange == null && (force || noMoreExchanges)
+                    ? releaseConnectionNoEvents()
+                    : null;
+        }
+        closeQuietly(socket);
+        return e;
+    }
+
+    @Nullable Socket releaseConnectionNoEvents() {
+        return this.connection.socket();
     }
 }

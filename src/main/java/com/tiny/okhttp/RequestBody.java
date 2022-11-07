@@ -2,6 +2,7 @@ package com.tiny.okhttp;
 
 import com.sun.istack.internal.Nullable;
 import com.tiny.okhttp.internal.Util;
+import okio.BufferedSink;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -13,7 +14,7 @@ public abstract class RequestBody {
     public long contentLength() throws IOException {
         return -1;
     }
-//    public abstract void writeTo(BufferedSink sink) throws IOException;
+    public abstract void writeTo(BufferedSink sink) throws IOException;
 
     public static RequestBody create(@Nullable MediaType contentType, String content) {
         Charset charset = UTF_8;
@@ -45,9 +46,9 @@ public abstract class RequestBody {
                 return byteCount;
             }
 
-            /*@Override public void writeTo(BufferedSink sink) throws IOException {
+            @Override public void writeTo(BufferedSink sink) throws IOException {
                 sink.write(content, offset, byteCount);
-            }*/
+            }
         };
     }
 }

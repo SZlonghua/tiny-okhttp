@@ -37,4 +37,8 @@ public final class HttpUrl {
         return port;
     }
 
+    public String path(){
+        return path;
+    }
+
 }

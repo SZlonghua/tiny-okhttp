@@ -29,10 +29,14 @@ public final class RealConnection implements Connection {
      * {@link #rawSocket} itself if this connection does not use SSL.
      */
     private Socket socket;
-//    private Handshake handshake;
+    private Handshake handshake;
     private Protocol protocol;
     private BufferedSource source;
     private BufferedSink sink;
+
+    int successCount;
+
+    boolean noNewExchanges;
 
     public RealConnection(RealConnectionPool connectionPool, Route route) {
         this.connectionPool = connectionPool;
@@ -44,7 +48,7 @@ public final class RealConnection implements Connection {
         source.timeout().timeout(chain.readTimeoutMillis(), MILLISECONDS);
         sink.timeout().timeout(chain.writeTimeoutMillis(), MILLISECONDS);
         return new Http1ExchangeCodec(client, this, source, sink);*/
-        return new Http1ExchangeCodec();
+        return new Http1ExchangeCodec(client, this, source, sink);
     }
 
     public void connect(int connectTimeout, int readTimeout, int writeTimeout,
@@ -78,12 +82,12 @@ public final class RealConnection implements Connection {
             throw ce;
         }
 
-        /*try {
+        try {
             source = Okio.buffer(Okio.source(rawSocket));
             sink = Okio.buffer(Okio.sink(rawSocket));
         } catch (NullPointerException npe) {
             npe.printStackTrace();
-        }*/
+        }
     }
 
     public void connectSocket(Socket socket, InetSocketAddress address, int connectTimeout)
@@ -94,5 +98,26 @@ public final class RealConnection implements Connection {
     private void establishProtocol() {
         socket = rawSocket;
         protocol = Protocol.HTTP_1_1;
+    }
+
+    @Override
+    public Route route() {
+        return route;
+    }
+
+    @Override
+    public Socket socket() {
+        return socket;
+    }
+
+    @Override
+    public Handshake handshake() {
+        return handshake;
+    }
+
+    public void noNewExchanges() {
+        synchronized (connectionPool) {
+            noNewExchanges = true;
+        }
     }
 }
