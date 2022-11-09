@@ -4,6 +4,7 @@ import javax.net.SocketFactory;
 
 public class OkHttpClient implements Call.Factory {
 
+    final Dispatcher dispatcher;
     final SocketFactory socketFactory;
 
     final boolean retryOnConnectionFailure;
@@ -20,7 +21,7 @@ public class OkHttpClient implements Call.Factory {
     }
 
     OkHttpClient(Builder builder) {
-
+        this.dispatcher = builder.dispatcher;
         this.socketFactory = builder.socketFactory;
         this.retryOnConnectionFailure = builder.retryOnConnectionFailure;
 
@@ -65,8 +66,12 @@ public class OkHttpClient implements Call.Factory {
         return connectionPool;
     }
 
-    public static final class Builder {
+    public Dispatcher dispatcher() {
+        return dispatcher;
+    }
 
+    public static final class Builder {
+        Dispatcher dispatcher;
         SocketFactory socketFactory;
 
         boolean retryOnConnectionFailure;
@@ -79,7 +84,7 @@ public class OkHttpClient implements Call.Factory {
         ConnectionPool connectionPool;
 
         public Builder() {
-
+            dispatcher = new Dispatcher();
             socketFactory = SocketFactory.getDefault();
             retryOnConnectionFailure = true;
 

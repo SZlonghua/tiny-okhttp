@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.*;
@@ -107,6 +108,14 @@ public final class Util {
             case -1: return charset;
             default: throw new AssertionError();
         }
+    }
+
+    public static ThreadFactory threadFactory(String name, boolean daemon) {
+        return runnable -> {
+            Thread result = new Thread(runnable, name);
+            result.setDaemon(daemon);
+            return result;
+        };
     }
 
 }

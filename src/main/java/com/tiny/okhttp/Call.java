@@ -6,6 +6,8 @@ public interface Call {
 
     Response execute() throws IOException;
 
+    void enqueue(Callback responseCallback);
+
     interface Factory {
         Call newCall(Request request);
     }
